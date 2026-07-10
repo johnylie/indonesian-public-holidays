@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indonesian Public Holidays API</title>
+
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #030712;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --primary-glow: rgba(139, 92, 246, 0.4);
+            --secondary-glow: rgba(59, 130, 246, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: #030712;
+        }
+
+        .ambient-bg::before,
+        .ambient-bg::after {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.5;
+            animation: pulse 10s infinite alternate;
+        }
+
+        .ambient-bg::before {
+            background: var(--primary-glow);
+            top: -200px;
+            left: -200px;
+        }
+
+        .ambient-bg::after {
+            background: var(--secondary-glow);
+            bottom: -200px;
+            right: -200px;
+            animation-delay: -5s;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.3; }
+            50% { transform: scale(1.2) translate(50px, 50px); opacity: 0.5; }
+            100% { transform: scale(0.9) translate(-50px, 20px); opacity: 0.3; }
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem;
+            position: relative;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 5rem;
+            animation: fadeUp 1s ease-out forwards;
+            opacity: 0;
+        }
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .badge-pill:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .badge-pill i {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #fff, #9ca3af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 5rem;
+        }
+
+        .spotlight-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .spotlight-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .spotlight-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06), transparent 40%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .spotlight-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+
+        .spotlight-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .spotlight-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .api-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            animation: fadeUp 1s ease-out 0.4s forwards;
+            opacity: 0;
+        }
+
+        .api-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .api-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .api-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        @media (max-width: 768px) {
+            .api-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .endpoints-list {
+            padding: 2rem;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .endpoints-list {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+
+        .endpoint-item {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .endpoint-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .endpoint-item:hover, .endpoint-item.active {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--border-color);
+        }
+
+        .endpoint-method {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .endpoint-path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: #e5e7eb;
+        }
+
+        .endpoint-preview {
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .code-block {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: #a78bfa;
+            white-space: pre-wrap;
+            word-break: break-all;
+            height: 100%;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .code-block .key { color: #93c5fd; }
+        .code-block .string { color: #86efac; }
+        .code-block .boolean { color: #fca5a5; }
+
+        .code-editor-window {
+            background: #1e1e1e;
+            border-top: 1px solid #333;
+        }
+
+        .editor-header {
+            background: #2d2d2d;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #404040;
+        }
+
+        .mac-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mac-buttons span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .mac-buttons .close { background: #ff5f56; }
+        .mac-buttons .minimize { background: #ffbd2e; }
+        .mac-buttons .maximize { background: #27c93f; }
+
+        .editor-title {
+            color: #858585;
+            font-size: 0.85rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin-left: auto;
+            margin-right: auto;
+            transform: translateX(-24px);
+        }
+
+        .editor-body {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: #d4d4d4;
+            overflow-x: auto;
+            margin: 0;
+        }
+
+        .editor-body pre {
+            margin: 0;
+        }
+
+        .editor-body .keyword { color: #569cd6; }
+        .editor-body .string { color: #ce9178; }
+        .editor-body .comment { color: #6a9955; }
+        .editor-body .function { color: #dcdcaa; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+
+        footer {
+            text-align: center;
+            padding: 4rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg"></div>
+
+    <div class="container">
+        <header class="hero">
+            <div class="badge-pill">
+                <i></i> API Operational
+            </div>
+            <h1>Indonesian Public Holidays</h1>
+            <p class="subtitle">A lightning-fast, highly-available JSON API and NPM Library for tracking national holidays and joint leaves (cuti bersama) in Indonesia. Use it as a standalone HTTP API or install it directly in your Node.js/TypeScript projects.</p>
+        </header>
+
+        <div class="cards-grid">
+            <div class="spotlight-card delay-1">
+                <div class="card-content">
+                    <div class="card-icon"><i data-lucide="zap"></i></div>
+                    <h3>Blazing Fast</h3>
+                    <p>Leveraging Edge Caching on Vercel to deliver responses with minimal latency globally.</p>
+                </div>
+            </div>
+            <div class="spotlight-card delay-2">
+                <div class="card-content">
+                    <div class="card-icon"><i data-lucide="calendar-check"></i></div>
+                    <h3>Always Accurate</h3>
+                    <p>Holidays are sourced directly from the latest official calendars, constantly updated.</p>
+                </div>
+            </div>
+            <div class="spotlight-card delay-3">
+                <div class="card-content">
+                    <div class="card-icon"><i data-lucide="code-2"></i></div>
+                    <h3>Developer First</h3>
+                    <p>Simple REST endpoints returning standard JSON. Easy to integrate into any stack.</p>
+                </div>
+            </div>
+            <div class="spotlight-card delay-4">
+                <div class="card-content">
+                    <div class="card-icon"><i data-lucide="package"></i></div>
+                    <h3>NPM Package</h3>
+                    <p>Also available as a library. Install via <code>npm i indonesian-public-holidays</code> to use in your JS/TS projects.</p>
+                </div>
+            </div>
+            <div class="spotlight-card delay-5">
+                <div class="card-content">
+                    <div class="card-icon"><i data-lucide="shield-check"></i></div>
+                    <h3>TypeScript Ready</h3>
+                    <p>Built with TypeScript. Includes full type definitions out of the box for a seamless developer experience.</p>
+                </div>
+            </div>
+            <div class="spotlight-card delay-6">
+                <div class="card-content">
+                    <div class="card-icon"><i data-lucide="github"></i></div>
+                    <h3>Open Source</h3>
+                    <p>100% free and open source under the MIT License. Contributions and improvements are always welcome.</p>
+                </div>
+            </div>
+        </div>
+
+        <section class="api-section" style="margin-bottom: 2rem;">
+            <div class="api-header">
+                <h2>NPM Library Showcase</h2>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Install via <code style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace;">npm install indonesian-public-holidays</code>
+                </div>
+            </div>
+            <div class="code-editor-window">
+               <div class="editor-header">
+                   <div class="mac-buttons" style="flex: 1;">
+                       <span class="close"></span>
+                       <span class="minimize"></span>
+                       <span class="maximize"></span>
+                   </div>
+                   <div class="editor-title" style="flex: 1; text-align: center; transform: none; margin: 0;">index.js (Auto Demo)</div>
+                   <div style="flex: 1; display: flex; justify-content: flex-end;">
+                   </div>
+               </div>
+               <div class="editor-body" style="padding: 0; padding-top: 1rem;">
+                   <div id="monaco-container-auto" style="height: 120px; width: 100%;"></div>
+               </div>
+               <div id="mock-console-auto" style="background: #111; color: #a78bfa; padding: 1rem; min-height: 60px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; border-top: 1px solid #333; overflow-y: auto; max-height: 250px; white-space: pre-wrap;"></div>
+            </div>
+        </section>
+
+        <section class="api-section" style="margin-bottom: 2rem;">
+            <div class="api-header">
+                <h2>Interactive Playground</h2>
+                <div style="color: var(--text-secondary); font-size: 0.9rem; display: flex; gap: 0.5rem; align-items: center;" id="template-buttons">
+                    <button class="template-btn active" onclick="loadTemplate(0)" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;">getHoliday</button>
+                    <button class="template-btn" onclick="loadTemplate(1)" style="background: rgba(255,255,255,0.05); border: 1px solid transparent; color: var(--text-secondary); padding: 4px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;">getHolidayDate</button>
+                    <button class="template-btn" onclick="loadTemplate(2)" style="background: rgba(255,255,255,0.05); border: 1px solid transparent; color: var(--text-secondary); padding: 4px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;">getHolidayYearly</button>
+                </div>
+            </div>
+            <div class="code-editor-window">
+               <div class="editor-header">
+                   <div class="mac-buttons" style="flex: 1;">
+                       <span class="close"></span>
+                       <span class="minimize"></span>
+                       <span class="maximize"></span>
+                   </div>
+                   <div class="editor-title" style="flex: 1; text-align: center; transform: none; margin: 0;">playground.js</div>
+                   <div style="flex: 1; display: flex; justify-content: flex-end;">
+                       <button onclick="runMonacoCode()" style="background: rgba(39, 201, 63, 0.1); border: 1px solid rgba(39, 201, 63, 0.5); color: #27c93f; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: all 0.2s;" onmouseover="this.style.background='rgba(39, 201, 63, 0.2)'" onmouseout="this.style.background='rgba(39, 201, 63, 0.1)'">
+                           <i data-lucide="play" style="width: 14px; height: 14px;"></i> Run
+                       </button>
+                   </div>
+               </div>
+               <div class="editor-body" style="padding: 0; padding-top: 1rem;">
+                   <div id="monaco-container-manual" style="height: 120px; width: 100%;"></div>
+               </div>
+               <div id="mock-console-manual" style="background: #111; color: #a78bfa; padding: 1rem; min-height: 60px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; border-top: 1px solid #333; overflow-y: auto; max-height: 250px; white-space: pre-wrap;"></div>
+            </div>
+        </section>
+
+        <section class="api-section">
+            <div class="api-header">
+                <h2>Interactive Documentation</h2>
+                <a href="https://github.com/johnylie/indonesian-public-holidays" target="_blank" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="github"></i> View Source
+                </a>
+            </div>
+            <div class="api-body">
+                <div class="endpoints-list">
+                    <div class="endpoint-item active" onclick="fetchData('/api', this)">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method">GET</span>
+                            <span class="endpoint-path">/api</span>
+                        </div>
+                        <div class="endpoint-desc">Get all holidays for the current year.</div>
+                    </div>
+                    <div class="endpoint-item" onclick="fetchData('/api/today', this)">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method">GET</span>
+                            <span class="endpoint-path">/api/today</span>
+                        </div>
+                        <div class="endpoint-desc">Check if today is a holiday.</div>
+                    </div>
+                    <div class="endpoint-item" onclick="fetchData('/api/tomorrow', this)">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method">GET</span>
+                            <span class="endpoint-path">/api/tomorrow</span>
+                        </div>
+                        <div class="endpoint-desc">Check if tomorrow is a holiday.</div>
+                    </div>
+                    <div class="endpoint-item" onclick="fetchData('/api?year=2021&month=8', this)">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method">GET</span>
+                            <span class="endpoint-path">/api?year=2021&month=8</span>
+                        </div>
+                        <div class="endpoint-desc">Get holidays for August 2021.</div>
+                    </div>
+                    <div class="endpoint-item" onclick="fetchData('/api?year=2022&month=12&day=25', this)">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method">GET</span>
+                            <span class="endpoint-path">/api?year=2022&month=12&day=25</span>
+                        </div>
+                        <div class="endpoint-desc">Check if December 25, 2022 is a holiday.</div>
+                    </div>
+                    <div class="endpoint-item" onclick="fetchData('/api?year=2024', this)">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method">GET</span>
+                            <span class="endpoint-path">/api?year=2024</span>
+                        </div>
+                        <div class="endpoint-desc">Get all holidays for the year 2024.</div>
+                    </div>
+                    <div class="endpoint-item" onclick="fetchData('/api?year=2024&month=4', this)">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method">GET</span>
+                            <span class="endpoint-path">/api?year=2024&month=4</span>
+                        </div>
+                        <div class="endpoint-desc">Get holidays for April 2024.</div>
+                    </div>
+                      <div class="endpoint-item" onclick="fetchData('/api?year=2025', this)">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method">GET</span>
+                            <span class="endpoint-path">/api?year=2025</span>
+                        </div>
+                        <div class="endpoint-desc">Get all holidays for the year 2025.</div>
+                    </div>
+                    <div class="endpoint-item" onclick="fetchData('/api?year=2025&month=1&day=1', this)">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method">GET</span>
+                            <span class="endpoint-path">/api?year=2025&month=1&day=1</span>
+                        </div>
+                        <div class="endpoint-desc">Check if January 1, 2025 is a holiday.</div>
+                    </div>
+                    <div class="endpoint-item" onclick="fetchData('/api?year=2026', this)">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method">GET</span>
+                            <span class="endpoint-path">/api?year=2026</span>
+                        </div>
+                        <div class="endpoint-desc">Get all holidays for the year 2026.</div>
+                    </div>
+                </div>
+                <div class="endpoint-preview">
+                    <div id="loading" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <i data-lucide="loader-2" class="lucide-spin" style="animation: spin 1s linear infinite; width: 32px; height: 32px; color: var(--text-secondary);"></i>
+                    </div>
+                    <pre class="code-block" id="response-preview">
+                      Select an endpoint to view the response
+                    </pre>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Designed and Built by <strong>Johny Lie</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('.spotlight-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.spotlight-card').forEach(card => {
+            card.style.animationPlayState = 'paused';
+            card.style.animation = 'fadeUp 0.8s ease-out forwards';
+            observer.observe(card);
+        });
+
+        function syntaxHighlight(json) {
+            if (typeof json != 'string') {
+                json = JSON.stringify(json, undefined, 2);
+            }
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'string';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'key';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'boolean';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        async function fetchData(url, element) {
+            document.querySelectorAll('.endpoint-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            const preview = document.getElementById('response-preview');
+            const loading = document.getElementById('loading');
+
+            preview.style.opacity = '0.3';
+            loading.style.display = 'block';
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                preview.innerHTML = syntaxHighlight(data);
+            } catch (err) {
+                preview.innerHTML = `<span style="color: #ef4444;">Error fetching data: ${err.message}</span>`;
+            } finally {
+                preview.style.opacity = '1';
+                loading.style.display = 'none';
+            }
+        }
+
+        fetchData('/api/today', document.querySelectorAll('.endpoint-item')[1]);
+
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs/loader.min.js"></script>
+    <script>
+        const manualSnippets = [
+            "import { getHoliday } from 'indonesian-public-holidays';\n\nconst holidays = await getHoliday('2026');\nconsole.log(holidays);",
+            "import { getHolidayDate } from 'indonesian-public-holidays';\n\nconst result = await getHolidayDate(new Date('2026-08-17'));\nconsole.log(result);",
+            "import { getHolidayYearly } from 'indonesian-public-holidays';\n\nconst holidays = await getHolidayYearly('2025');\nconsole.log(holidays);"
+        ];
+
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            
+            const editorConfig = {
+                language: 'javascript',
+                theme: 'vs-dark',
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 14,
+                fontFamily: "'JetBrains Mono', monospace",
+                lineNumbers: 'off',
+                folding: false,
+                overviewRulerLanes: 0,
+                hideCursorInOverviewRuler: true,
+                scrollbar: {
+                    vertical: 'hidden',
+                    horizontal: 'hidden'
+                }
+            };
+
+            window.monacoEditorAuto = monaco.editor.create(document.getElementById('monaco-container-auto'), {
+                ...editorConfig,
+                value: ""
+            });
+
+            window.monacoEditorManual = monaco.editor.create(document.getElementById('monaco-container-manual'), {
+                ...editorConfig,
+                value: manualSnippets[0]
+            });
+
+            const yearsToType = ['2024', '2025', '2026'];
+            let currentYearIndex = 0;
+            let currentFunctionIndex = 0;
+
+            function getNextSnippet() {
+                const year = yearsToType[currentYearIndex];
+                const snippets = [
+                    `import { getHoliday } from 'indonesian-public-holidays';\n\nconst holidays = await getHoliday('${year}');\nconsole.log(holidays);`,
+                    `import { getHolidayDate } from 'indonesian-public-holidays';\n\nconst result = await getHolidayDate(new Date('${year}-08-17'));\nconsole.log(result);`,
+                    `import { getHolidayYearly } from 'indonesian-public-holidays';\n\nconst holidays = await getHolidayYearly('${year}');\nconsole.log(holidays);`
+                ];
+                
+                const snippet = snippets[currentFunctionIndex];
+                
+                currentFunctionIndex++;
+                if (currentFunctionIndex >= snippets.length) {
+                    currentFunctionIndex = 0;
+                    currentYearIndex = (currentYearIndex + 1) % yearsToType.length;
+                }
+                
+                return snippet;
+            }
+
+            let codeToType = getNextSnippet();
+            let i = 0;
+            let isDeleting = false;
+            
+            function typeWriterLoop() {
+                if (!isDeleting && i < codeToType.length) {
+                    window.monacoEditorAuto.setValue(codeToType.substring(0, i + 1));
+                    i++;
+                    setTimeout(typeWriterLoop, Math.random() * 40 + 20);
+                } else if (!isDeleting && i === codeToType.length) {
+                    runMonacoCodeAuto();
+                    isDeleting = true;
+                    setTimeout(typeWriterLoop, 4000); 
+                } else if (isDeleting && i > 0) {
+                    window.monacoEditorAuto.setValue(codeToType.substring(0, i - 1));
+                    i--;
+                    setTimeout(typeWriterLoop, 15); 
+                } else if (isDeleting && i === 0) {
+                    isDeleting = false;
+                    document.getElementById('mock-console-auto').innerHTML = ''; 
+                    
+                    codeToType = getNextSnippet();
+                    
+                    setTimeout(typeWriterLoop, 1000); 
+                }
+            }
+            
+            setTimeout(typeWriterLoop, 800);
+        });
+
+        window.loadTemplate = function(index) {
+            if (window.monacoEditorManual) {
+                window.monacoEditorManual.setValue(manualSnippets[index]);
+                document.getElementById('mock-console-manual').innerHTML = '';
+                
+                const buttons = document.querySelectorAll('.template-btn');
+                buttons.forEach((btn, i) => {
+                    if (i === index) {
+                        btn.style.background = 'rgba(255,255,255,0.1)';
+                        btn.style.borderColor = 'rgba(255,255,255,0.2)';
+                        btn.style.color = 'white';
+                        btn.classList.add('active');
+                    } else {
+                        btn.style.background = 'rgba(255,255,255,0.05)';
+                        btn.style.borderColor = 'transparent';
+                        btn.style.color = 'var(--text-secondary)';
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+        };
+
+        async function executeCode(editor, consoleElementId) {
+            const consoleEl = document.getElementById(consoleElementId);
+            consoleEl.innerHTML = '<span style="color: #888;">Running...</span>';
+            
+            if (!editor) {
+                consoleEl.innerHTML = '<span style="color: #ff5f56;">Error: Editor not loaded yet.</span>';
+                return;
+            }
+
+            const code = editor.getValue();
+            let query = '';
+
+            const dateMatch = code.match(/getHolidayDate\(new Date\(['"`](\d{4})-(\d{2})-(\d{2})['"`]\)\)/);
+            if (dateMatch) {
+                query = `?year=${dateMatch[1]}&month=${dateMatch[2]}&day=${dateMatch[3]}`;
+            } else {
+                const yearMatch = code.match(/(?:getHoliday|getHolidayYearly)\(['"`](\d{4})['"`]\)/);
+                if (yearMatch && yearMatch[1]) {
+                    query = `?year=${yearMatch[1]}`;
+                } else if (!code.match(/(?:getHoliday|getHolidayYearly|getHolidayDate)\(/)) {
+                     consoleEl.innerHTML = '<span style="color: #ffbd2e;">Info: For this demo, please use one of the getHoliday methods.</span>';
+                     return;
+                }
+            }
+
+            try {
+                const res = await fetch(`/api${query}`);
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                const data = await res.json();
+                
+                consoleEl.innerHTML = `<span style="color: #27c93f;">></span> ${JSON.stringify(data, null, 2)}`;
+            } catch (err) {
+                consoleEl.innerHTML = `<span style="color: #ff5f56;">Error fetching data: ${err.message}</span>`;
+            }
+        }
+
+        async function runMonacoCodeAuto() {
+            await executeCode(window.monacoEditorAuto, 'mock-console-auto');
+        }
+
+        async function runMonacoCode() {
+            await executeCode(window.monacoEditorManual, 'mock-console-manual');
+        }
+    </script>
+</body>
+</html>
